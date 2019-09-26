@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lightGrey">#93959f</color>
+
+    <color name="colorCommonPrimary">#fafafa</color>
+    <color name="colorCommonPrimaryOff">#ffffff</color>
+    <color name="colorCommonPrimaryDark">#c7c7c7</color>
+    <color name="colorCommonAccent">#000000</color>
+</resources>

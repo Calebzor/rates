@@ -1,0 +1,46 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+update_fastlane
+
+default_platform(:android)
+
+platform :android do
+
+  lane :release do
+
+  	increment_version_code(
+  		gradle_file_path: "version.properties"
+  	)
+
+  	gradle(
+  		task: "app:assembleRelease"
+  	)
+
+  	hockey(
+    	api_token: ENV['HOCKEY_APP_TOKEN'],
+    	notes: "Latest Rates app",
+    	notify: "2",
+    	status: "2",
+    	apk: Actions.lane_context[Actions::SharedValues::GRADLE_APK_OUTPUT_PATH],
+    	dsym: "./app/build/outputs/mapping/release/mapping.txt",
+    	public_identifier: "778d3ad77d3942c28ef32fb0ec9381c6"
+    )
+
+  end
+
+  lane :increment_version do
+
+  	increment_version_code(
+  		gradle_file_path: "version.properties"
+  	)
+
+  end
+
+end

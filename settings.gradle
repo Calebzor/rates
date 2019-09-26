@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':common', ':conversion'
 rootProject.name='Rates'

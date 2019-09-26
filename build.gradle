@@ -1,5 +1,4 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
     repositories {
         google()
@@ -8,10 +7,14 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.5.0'
-        
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+		classpath 'com.jakewharton:butterknife-gradle-plugin:10.1.0'
+		classpath 'org.jacoco:org.jacoco.core:0.8.4'
+		classpath 'com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta07'
     }
+}
+
+plugins {
+	id "org.sonarqube" version "2.7.1"
 }
 
 allprojects {
@@ -22,6 +25,58 @@ allprojects {
     }
 }
 
+ext {
+	globalCompileSDK = 28
+	globalMinSDK = 23
+	globalTargetSDK = 28
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+static def readVersion(project) {
+	def versionFile = new File(project.rootDir, 'version.properties')
+	def version = new Properties()
+	def stream
+	try {
+		stream = new FileInputStream(versionFile)
+		version.load(stream)
+	}
+	catch (FileNotFoundException e) {
+		println e
+	}
+	finally {
+		if (stream != null) stream.close()
+	}
+	return version
+}
+
+static def readVersionCode(project) {
+	def version = readVersion(project)
+	def build = version['versionCode'] as int
+	return build
+}
+
+static def readVersionName(project) {
+	def version = readVersion(project)
+	def versionName = "${version['versionName']}" + "." + readVersionCode(project)
+	return versionName
+}
+
+sonarqube {
+	androidVariant 'debug'
+	properties {
+		property "sonar.organization", "calebzor-github"
+		property "sonar.projectKey", "Rates"
+		property "sonar.projectName", "Rates"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.login", System.getenv("SONAR_LOGIN")
+		property "sonar.branch.name", System.getenv("CIRCLE_BRANCH") == null ? "master" : System.getenv("CIRCLE_BRANCH").replace("repo ", "")
+		property "sonar.sourceEncoding", "UTF-8"
+		property "sonar.projectVersion", readVersionName(project)
+		property "sonar.project.version", readVersionName(project)
+
+		property "sonar.exclusions", "**/*ApiObject.java"
+	}
 }
