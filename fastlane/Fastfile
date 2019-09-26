@@ -28,6 +28,7 @@ platform :android do
     	owner_name: "TamasVarga",
     	app_name: "Rates",
     	notify_testers: false,
+    	destinations: "All-users-of-Rates",
     	apk: Actions.lane_context[Actions::SharedValues::GRADLE_APK_OUTPUT_PATH],
     	dsym: "./app/build/outputs/mapping/release/mapping.txt"
     )
