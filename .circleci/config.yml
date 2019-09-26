@@ -4,7 +4,7 @@ references:
   ## Cache
 
   cache_key: &cache_key
-    key: cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}-{{ checksum "common_dependencies.gradle" }}
+    key: cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}-{{ checksum "common_dependencies.gradle" }}-{{ checksum "common/build.gradle" }}-{{ checksum "conversion/build.gradle" }}
   restore_cache: &restore_cache
     restore_cache:
       <<: *cache_key
