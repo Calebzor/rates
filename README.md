@@ -4,8 +4,8 @@
 Android app for currency rates
 
 ## Download
-### Hockeyapp
-
+### AppCenter
+[![AppCenter](https://chart.googleapis.com/chart?cht=qr&chl=https%3A%2F%2Finstall.appcenter.ms%2Fusers%2Ftamasvarga%2Fapps%2Frates%2Fdistribution_groups%2Fall-users-of-rates&chs=256x256)](https://install.appcenter.ms/users/tamasvarga/apps/rates/distribution_groups/all-users-of-rates)
 
 ## CI
 ### CircleCI
