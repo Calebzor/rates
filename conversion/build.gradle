@@ -68,8 +68,8 @@ sonarqube {
 		property "sonar.sources", android.sourceSets.main.java.srcDirs
 
 		property "sonar.tests", "src/test/java"
-		property "sonar.java.binaries", "${buildDir}/intermediates/classes/debug"
-		property "sonar.java.test.binaries", "${buildDir}/intermediates/classes/test/debug"
+		property "sonar.java.binaries", "${buildDir}/intermediates/javac/debug/classes"
+		property "sonar.java.test.binaries", "${buildDir}/intermediates/javac/debugUnitTest/classes"
 		property "sonar.jacoco.reportPaths", "${buildDir}/jacoco/testDebugUnitTest.exec"
 		property "sonar.junit.reportsPath", "${buildDir}/test-results/testDebugUnitTest"
 

@@ -72,10 +72,8 @@ sonarqube {
 		property "sonar.projectName", "Rates"
 		property "sonar.host.url", "https://sonarcloud.io"
 		property "sonar.login", System.getenv("SONAR_LOGIN")
-		property "sonar.branch.name", System.getenv("CIRCLE_BRANCH") == null ? "master" : System.getenv("CIRCLE_BRANCH").replace("repo ", "")
 		property "sonar.sourceEncoding", "UTF-8"
 		property "sonar.projectVersion", readVersionName(project)
-		property "sonar.project.version", readVersionName(project)
 
 		property "sonar.exclusions", "**/*ApiObject.java"
 	}
