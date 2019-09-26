@@ -13,3 +13,4 @@ Android app for currency rates
 
 ## Quality
 ### Sonar
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Rates&metric=alert_status)](https://sonarcloud.io/dashboard?id=Rates)
