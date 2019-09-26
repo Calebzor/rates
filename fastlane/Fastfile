@@ -25,7 +25,7 @@ platform :android do
 
   	appcenter_upload(
     	api_token: ENV['APPCENTER_API_TOKEN'],
-    	owner_name: "TamasVarga"
+    	owner_name: "TamasVarga",
     	app_name: "Rates",
     	notify_testers: false,
     	apk: Actions.lane_context[Actions::SharedValues::GRADLE_APK_OUTPUT_PATH],
