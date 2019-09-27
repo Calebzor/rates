@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">conversion</string>
+    <string name="no_conversion">No conversion rates are available please try again later.</string>
 </resources>

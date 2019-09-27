@@ -17,8 +17,7 @@ public class ApiModule {
 	@ApplicationScoped
 	Gson provideGson() {
 		GsonBuilder builder = new GsonBuilder();
-		Gson310TypeAdapters.register(builder, ZonedDateTime.class,
-				DateTimeFormatter.ISO_ZONED_DATE_TIME);
+		Gson310TypeAdapters.register(builder, ZonedDateTime.class, DateTimeFormatter.ISO_DATE);
 
 		return builder.create();
 	}

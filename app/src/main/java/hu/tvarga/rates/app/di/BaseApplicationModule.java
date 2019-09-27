@@ -6,9 +6,6 @@ import android.content.Context;
 import dagger.Module;
 import dagger.Provides;
 import hu.tvarga.rates.common.app.di.annotations.qualifiers.ApplicationContext;
-import hu.tvarga.rates.common.app.di.annotations.scope.ApplicationScoped;
-import hu.tvarga.rates.common.app.ui.AndroidStrings;
-import hu.tvarga.rates.common.app.ui.Strings;
 
 @Module
 public class BaseApplicationModule {
@@ -17,12 +14,6 @@ public class BaseApplicationModule {
 
 	public BaseApplicationModule(Application application) {
 		this.application = application;
-	}
-
-	@Provides
-	@ApplicationScoped
-	Strings provideStrings() {
-		return new AndroidStrings(application.getResources());
 	}
 
 	@Provides

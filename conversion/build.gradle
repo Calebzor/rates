@@ -52,6 +52,9 @@ apply from: '../common_dependencies.gradle'
 
 dependencies {
 	implementation project(":common")
+
+	implementation 'com.jwang123.flagkit:flagkit:1.0'
+	implementation 'de.hdodenhof:circleimageview:3.0.0'
 }
 
 def getAndroidTestCoverageFiles() {

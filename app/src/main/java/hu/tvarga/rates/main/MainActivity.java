@@ -8,7 +8,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import dagger.android.support.DaggerAppCompatActivity;
-import hu.tvarga.conversion.ConversionFragment;
+import hu.tvarga.conversion.ui.ConversionFragment;
 import hu.tvarga.rates.R;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
