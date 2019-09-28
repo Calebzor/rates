@@ -2,8 +2,6 @@ package hu.tvarga.conversion.ui;
 
 import android.icu.util.Currency;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +74,6 @@ public class ConversionViewModel extends ViewModel {
 		if (subscribe != null) {
 			subscribe.dispose();
 		}
-	}
-
-	private String getValue(BigDecimal value) {
-		return String.format(localeProvider.getCurrentLocale(), "%.2f",
-				value.setScale(2, RoundingMode.FLOOR));
 	}
 
 	public void setModifiedListItem(ConversionListElement conversionListElement) {
