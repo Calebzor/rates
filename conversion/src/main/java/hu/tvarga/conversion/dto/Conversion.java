@@ -7,15 +7,15 @@ public class Conversion {
 
 	private String base = "EUR";
 	private BigDecimal baseValue = BigDecimal.ONE;
-	private Map<String, BigDecimal> rates;
+	private Map<String, String> rates;
 
-	public Conversion(String base, BigDecimal baseValue, Map<String, BigDecimal> rates) {
+	public Conversion(String base, BigDecimal baseValue, Map<String, String> rates) {
 		this.base = base;
 		this.baseValue = baseValue;
 		this.rates = rates;
 	}
 
-	public Conversion(Map<String, BigDecimal> rates) {
+	public Conversion(Map<String, String> rates) {
 		this.rates = rates;
 	}
 
@@ -35,11 +35,11 @@ public class Conversion {
 		this.baseValue = baseValue;
 	}
 
-	public Map<String, BigDecimal> getRates() {
+	public Map<String, String> getRates() {
 		return rates;
 	}
 
-	public void setRates(Map<String, BigDecimal> rates) {
+	public void setRates(Map<String, String> rates) {
 		this.rates = rates;
 	}
 }

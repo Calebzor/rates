@@ -15,6 +15,7 @@ import android.widget.TextView;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
@@ -94,7 +95,8 @@ public class ConversionListAdapter
 		String value = conversionListElement.getConversionRate();
 		BigDecimal multiplied = new BigDecimal(value).multiply(
 				new BigDecimal(listElements.get(0).getValue()));
-		return String.format(localeProvider.getCurrentLocale(), "%.2f", multiplied);
+		return String.format(localeProvider.getCurrentLocale(), "%.2f",
+				multiplied.setScale(2, RoundingMode.FLOOR));
 	}
 
 	PublishSubject<ConversionListElement> getConversionListElementPublishSubject() {

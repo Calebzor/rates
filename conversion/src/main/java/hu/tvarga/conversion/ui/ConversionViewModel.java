@@ -54,10 +54,10 @@ public class ConversionViewModel extends ViewModel {
 					List<ConversionListElement> conversionListElements = new ArrayList<>();
 					if (conversion != null && conversion.getRates() != null) {
 						conversionListElements.add(conversionListElement);
-						Map<String, BigDecimal> rates = conversion.getRates();
-						for (Map.Entry<String, BigDecimal> entry : rates.entrySet()) {
+						Map<String, String> rates = conversion.getRates();
+						for (Map.Entry<String, String> entry : rates.entrySet()) {
 							ConversionListElement element = new ConversionListElement(
-									getValue(entry.getValue()), getValue(entry.getValue()),
+									entry.getValue(), entry.getValue(),
 									Currency.getInstance(entry.getKey()));
 							conversionListElements.add(element);
 						}
