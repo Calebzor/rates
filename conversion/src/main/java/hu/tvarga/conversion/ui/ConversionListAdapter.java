@@ -41,6 +41,7 @@ import static hu.tvarga.conversion.currencytocountry.CurrencyToCountryMapper.UNK
 public class ConversionListAdapter
 		extends RecyclerView.Adapter<ConversionListAdapter.CurrencyListItemViewHolder> {
 
+	private static final String ALL = "ALL";
 	private final LocaleProvider localeProvider;
 	private final CurrencyToCountryMapper currencyToCountryMapper;
 	private final PublishSubject<ConversionListElement> conversionListElementPublishSubject =
@@ -66,74 +67,18 @@ public class ConversionListAdapter
 	@Override
 	public void onBindViewHolder(@NonNull CurrencyListItemViewHolder holder, int position) {
 		ConversionListElement conversionListElement = listElements.get(position);
-		Locale currentLocale = localeProvider.getCurrentLocale();
-		if (!holder.amount.isFocused()) {
-			holder.amount.setText(conversionListElement.getValue());
+		holder.bind(conversionListElement);
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull CurrencyListItemViewHolder holder, int position,
+			@NonNull List<Object> payloads) {
+		if (!payloads.isEmpty()) {
+			holder.bind(listElements.get(position));
 		}
-		String isoCodeString = conversionListElement.getISOCodeString();
-		if (!isoCodeString.equals(holder.isoCode.getText().toString())) {
-			holder.isoCode.setText(isoCodeString);
-			holder.displayName.setText(conversionListElement.getDisplayName(currentLocale));
-			Currency currency = Currency.getInstance(isoCodeString);
-
-			String currencyCode = currency.getCurrencyCode();
-			String countryCodeForCurrencyCode =
-					currencyToCountryMapper.getCountryCodeForCurrencyCode(currencyCode);
-			if (!UNKNOWN_CURRENCY_TO_COUNTRY_MAPPING.equals(countryCodeForCurrencyCode)) {
-				Resources resources = holder.itemView.getResources();
-				int resourceId = resources.getIdentifier(countryCodeForCurrencyCode.toLowerCase(),
-						"drawable", holder.itemView.getContext().getPackageName());
-
-				if (resourceId != 0) {
-					Bitmap bitmap = BitmapFactory.decodeResource(resources, resourceId);
-					holder.flag.setImageBitmap(bitmap);
-				}
-				else {
-					holder.flag.setImageResource(android.R.drawable.ic_menu_report_image);
-				}
-			}
+		else {
+			super.onBindViewHolder(holder, position, payloads);
 		}
-		holder.amount.setOnFocusChangeListener((v, hasFocus) -> {
-			if (!hasFocus) {
-				return;
-			}
-			if (position > 0) {
-				List<ConversionListElement> newList = new ArrayList<>(listElements);
-				newList.remove(position);
-				Collections.sort(newList);
-				newList.add(0, conversionListElement);
-				DiffUtil.DiffResult diffResult = getDiffResult(this.listElements, newList);
-				holder.itemView.post(() -> diffResult.dispatchUpdatesTo(this));
-
-				listElements.clear();
-				listElements.addAll(newList);
-
-				conversionListElementPublishSubject.onNext(conversionListElement);
-			}
-		});
-		holder.amount.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-				// not used
-			}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before, int count) {
-				// not used
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				String newAmount = s.toString();
-				if (!StringUtils.isNullOrEmpty(newAmount) && holder.amount.isFocused()) {
-					conversionListElement.setValue(newAmount);
-					listElements.get(0).setValue(newAmount);
-					applyMultiplier(listElements);
-					notifyItemRangeChanged(1, listElements.size() - 1);
-					conversionListElementPublishSubject.onNext(conversionListElement);
-				}
-			}
-		});
 	}
 
 	private void applyMultiplier(List<ConversionListElement> listElements) {
@@ -165,40 +110,7 @@ public class ConversionListAdapter
 		applyMultiplier(listElements);
 		this.listElements.clear();
 		this.listElements.addAll(listElements);
-		notifyItemRangeChanged(1, listElements.size() - 1);
-	}
-
-	@NotNull
-	private DiffUtil.DiffResult getDiffResult(List<ConversionListElement> oldList,
-			List<ConversionListElement> newList) {
-		return DiffUtil.calculateDiff(new DiffUtil.Callback() {
-
-			@Override
-			public int getOldListSize() {
-				return oldList.size();
-			}
-
-			@Override
-			public int getNewListSize() {
-				return newList.size();
-			}
-
-			@Override
-			public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
-				return oldList.get(oldItemPosition).getCurrency().equals(
-						newList.get(newItemPosition).getCurrency());
-			}
-
-			@Override
-			public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-				return isEquals(oldItemPosition, newItemPosition);
-			}
-
-			private boolean isEquals(int oldItemPosition, int newItemPosition) {
-				return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
-			}
-
-		});
+		notifyItemRangeChanged(1, listElements.size() - 1, ALL);
 	}
 
 	class CurrencyListItemViewHolder extends RecyclerView.ViewHolder {
@@ -215,10 +127,127 @@ public class ConversionListAdapter
 		@BindView(R2.id.isoCode)
 		TextView isoCode;
 
+		private String isoCodeString = "";
+
 		CurrencyListItemViewHolder(View itemView) {
 			super(itemView);
 			ButterKnife.bind(this, itemView);
 		}
 
+		void bind(ConversionListElement element) {
+			if (!isoCodeString.equals(element.getISOCodeString())) {
+				isoCodeString = element.getISOCodeString();
+				initView(element);
+			}
+
+			if (!amount.isFocused()) {
+				amount.setText(element.getValue());
+			}
+
+			amount.setOnFocusChangeListener((v, hasFocus) -> {
+				if (!hasFocus) {
+					return;
+				}
+				int position = getLayoutPosition();
+				if (position > 0) {
+					List<ConversionListElement> newList = new ArrayList<>(listElements);
+					newList.remove(position);
+					Collections.sort(newList);
+					newList.add(0, element);
+					DiffUtil.DiffResult diffResult = getDiffResult(listElements, newList);
+					itemView.post(() -> diffResult.dispatchUpdatesTo(ConversionListAdapter.this));
+
+					listElements.clear();
+					listElements.addAll(newList);
+
+					conversionListElementPublishSubject.onNext(element);
+				}
+			});
+			amount.addTextChangedListener(new TextWatcher() {
+				@Override
+				public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+					// not used
+				}
+
+				@Override
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
+					// not used
+				}
+
+				@Override
+				public void afterTextChanged(Editable s) {
+					String newAmount = s.toString();
+					if (!StringUtils.isNullOrEmpty(newAmount) && amount.isFocused()) {
+						element.setValue(newAmount);
+						listElements.get(0).setValue(newAmount);
+						applyMultiplier(listElements);
+						notifyItemRangeChanged(1, listElements.size() - 1, ALL);
+						conversionListElementPublishSubject.onNext(element);
+					}
+				}
+			});
+		}
+
+		private void initView(ConversionListElement conversionListElement) {
+			Locale currentLocale = localeProvider.getCurrentLocale();
+
+			if (!isoCodeString.equals(isoCode.getText().toString())) {
+				isoCode.setText(isoCodeString);
+				displayName.setText(conversionListElement.getDisplayName(currentLocale));
+				Currency currency = Currency.getInstance(isoCodeString);
+
+				String currencyCode = currency.getCurrencyCode();
+				String countryCodeForCurrencyCode =
+						currencyToCountryMapper.getCountryCodeForCurrencyCode(currencyCode);
+				if (!UNKNOWN_CURRENCY_TO_COUNTRY_MAPPING.equals(countryCodeForCurrencyCode)) {
+					Resources resources = itemView.getResources();
+					int resourceId = resources.getIdentifier(
+							countryCodeForCurrencyCode.toLowerCase(), "drawable",
+							itemView.getContext().getPackageName());
+
+					if (resourceId != 0) {
+						Bitmap bitmap = BitmapFactory.decodeResource(resources, resourceId);
+						flag.setImageBitmap(bitmap);
+					}
+					else {
+						flag.setImageResource(android.R.drawable.ic_menu_report_image);
+					}
+				}
+			}
+
+		}
+
+		@NotNull
+		private DiffUtil.DiffResult getDiffResult(List<ConversionListElement> oldList,
+				List<ConversionListElement> newList) {
+			return DiffUtil.calculateDiff(new DiffUtil.Callback() {
+
+				@Override
+				public int getOldListSize() {
+					return oldList.size();
+				}
+
+				@Override
+				public int getNewListSize() {
+					return newList.size();
+				}
+
+				@Override
+				public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+					return oldList.get(oldItemPosition).getCurrency().equals(
+							newList.get(newItemPosition).getCurrency());
+				}
+
+				@Override
+				public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+					return isEquals(oldItemPosition, newItemPosition);
+				}
+
+				private boolean isEquals(int oldItemPosition, int newItemPosition) {
+					return oldList.get(oldItemPosition).equals(newList.get(newItemPosition));
+				}
+
+			});
+		}
 	}
 }
