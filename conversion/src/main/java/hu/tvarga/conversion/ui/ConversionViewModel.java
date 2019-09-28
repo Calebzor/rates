@@ -7,24 +7,33 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.LiveDataReactiveStreams;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import hu.tvarga.conversion.ConversionRepository;
 import hu.tvarga.conversion.dto.Conversion;
 import hu.tvarga.conversion.dto.ConversionListElement;
 import hu.tvarga.rates.common.app.locale.LocaleProvider;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.subjects.PublishSubject;
+import timber.log.Timber;
 
 public class ConversionViewModel extends ViewModel {
 
+	public static final long POLLING_INTERVAL = 1L;
 	private final ConversionRepository conversionRepository;
 	private final LocaleProvider localeProvider;
+	private final ConversionListElement conversionListElement = new ConversionListElement("1.00",
+			"1.00", Currency.getInstance("EUR"));
+	private final PublishSubject<List<ConversionListElement>> conversionListElementsPublishSubject =
+			PublishSubject.create();
+	private Disposable subscribe;
 
 	public ConversionViewModel(ConversionRepository conversionRepository,
 			LocaleProvider localeProvider) {
@@ -32,30 +41,53 @@ public class ConversionViewModel extends ViewModel {
 		this.localeProvider = localeProvider;
 	}
 
-	public LiveData<List<ConversionListElement>> getConversions() {
-		LiveData<Conversion> objectLiveData = LiveDataReactiveStreams.fromPublisher(
-				conversionRepository.getConversion(null));
-		return Transformations.map(objectLiveData, conversion -> {
-			List<ConversionListElement> conversionListElements = new ArrayList<>();
-			if (conversion != null && conversion.getRates() != null) {
-				ConversionListElement baseElement = new ConversionListElement(
-						getValue(conversion.getBaseValue()),
-						Currency.getInstance(conversion.getBase()));
-				conversionListElements.add(baseElement);
-				Map<String, BigDecimal> rates = conversion.getRates();
-				for (Map.Entry<String, BigDecimal> entry : rates.entrySet()) {
-					ConversionListElement element = new ConversionListElement(
-							getValue(entry.getValue()), Currency.getInstance(entry.getKey()));
-					conversionListElements.add(element);
-				}
-			}
-			return conversionListElements;
-		});
+	public PublishSubject<List<ConversionListElement>> getConversions() {
+		pollForConversions();
+		return conversionListElementsPublishSubject;
+	}
+
+	private void pollForConversions() {
+		Flowable<Conversion> conversions = conversionRepository.getConversion(
+				conversionListElement.getISOCodeString());
+		subscribe = conversions.delay(POLLING_INTERVAL, TimeUnit.SECONDS).repeatUntil(() -> false)
+				.observeOn(AndroidSchedulers.mainThread()).subscribe(conversion -> {
+					List<ConversionListElement> conversionListElements = new ArrayList<>();
+					if (conversion != null && conversion.getRates() != null) {
+						conversionListElements.add(conversionListElement);
+						Map<String, BigDecimal> rates = conversion.getRates();
+						for (Map.Entry<String, BigDecimal> entry : rates.entrySet()) {
+							ConversionListElement element = new ConversionListElement(
+									getValue(entry.getValue()), getValue(entry.getValue()),
+									Currency.getInstance(entry.getKey()));
+							conversionListElements.add(element);
+						}
+					}
+					conversionListElementsPublishSubject.onNext(conversionListElements);
+				}, Timber::w);
+	}
+
+	@Override
+	protected void onCleared() {
+		disposePolling();
+		super.onCleared();
+	}
+
+	private void disposePolling() {
+		if (subscribe != null) {
+			subscribe.dispose();
+		}
 	}
 
 	private String getValue(BigDecimal value) {
 		return String.format(localeProvider.getCurrentLocale(), "%.2f",
 				value.setScale(2, RoundingMode.FLOOR));
+	}
+
+	public void setModifiedListItem(ConversionListElement conversionListElement) {
+		disposePolling();
+		this.conversionListElement.setCurrency(conversionListElement.getCurrency());
+		this.conversionListElement.setValue(conversionListElement.getValue());
+		pollForConversions();
 	}
 
 	public static class ConversionViewModelFactory implements ViewModelProvider.Factory {

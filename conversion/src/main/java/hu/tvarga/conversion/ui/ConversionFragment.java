@@ -18,9 +18,11 @@ import butterknife.BindView;
 import hu.tvarga.conversion.R;
 import hu.tvarga.conversion.R2;
 import hu.tvarga.conversion.dto.ConversionListElement;
+import hu.tvarga.rates.common.ui.BaseFragment;
+import io.reactivex.disposables.CompositeDisposable;
 
 @SuppressWarnings("squid:MaximumInheritanceDepth")
-public class ConversionFragment extends hu.tvarga.rates.common.ui.BaseFragment {
+public class ConversionFragment extends BaseFragment {
 
 	public static ConversionFragment newInstance() {
 		return new ConversionFragment();
@@ -38,6 +40,8 @@ public class ConversionFragment extends hu.tvarga.rates.common.ui.BaseFragment {
 	@Inject
 	ConversionViewModel.ConversionViewModelFactory conversionViewModelFactory;
 	private ConversionViewModel conversionViewModel;
+
+	private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
 	@Nullable
 	@Override
@@ -57,7 +61,20 @@ public class ConversionFragment extends hu.tvarga.rates.common.ui.BaseFragment {
 		super.onActivityCreated(savedInstanceState);
 		conversionViewModel = ViewModelProviders.of(this, conversionViewModelFactory).get(
 				ConversionViewModel.class);
-		conversionViewModel.getConversions().observe(this, this::handleConversionLiveData);
+		compositeDisposable.add(
+				conversionViewModel.getConversions().subscribe(this::handleConversionLiveData));
+		compositeDisposable.add(conversionListAdapter.getConversionListElementPublishSubject()
+				.subscribe(conversionListElement -> {
+					conversionViewModel.setModifiedListItem(conversionListElement);
+				}));
+	}
+
+	@Override
+	public void onDestroyView() {
+		if (compositeDisposable != null) {
+			compositeDisposable.clear();
+		}
+		super.onDestroyView();
 	}
 
 	private void handleConversionLiveData(List<ConversionListElement> conversionListElements) {
@@ -69,7 +86,6 @@ public class ConversionFragment extends hu.tvarga.rates.common.ui.BaseFragment {
 			noConversion.setVisibility(View.GONE);
 			conversionRecyclerView.setVisibility(View.VISIBLE);
 			conversionListAdapter.setConversionList(conversionListElements);
-			conversionListAdapter.notifyDataSetChanged();
 		}
 	}
 
