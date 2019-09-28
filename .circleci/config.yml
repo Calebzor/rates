@@ -106,7 +106,8 @@ jobs:
       - run:
           name: Set Ruby Version
           command:  echo "ruby-2.4" > ~/.ruby-version
-      - run: bundle install
+      - run: gem install bundler
+      - run: bundle update --bundler
       - run:
           name: Fastlane
           command: bundle exec fastlane $FASTLANE_LANE

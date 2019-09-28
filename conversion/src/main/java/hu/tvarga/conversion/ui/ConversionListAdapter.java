@@ -103,7 +103,8 @@ public class ConversionListAdapter
 				Collections.sort(newList);
 				newList.add(0, conversionListElement);
 				DiffUtil.DiffResult diffResult = getDiffResult(this.listElements, newList);
-				diffResult.dispatchUpdatesTo(this);
+				holder.itemView.post(() -> diffResult.dispatchUpdatesTo(this));
+
 				listElements.clear();
 				listElements.addAll(newList);
 
