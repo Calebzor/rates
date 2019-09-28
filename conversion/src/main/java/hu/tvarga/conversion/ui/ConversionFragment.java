@@ -18,6 +18,7 @@ import butterknife.BindView;
 import hu.tvarga.conversion.R;
 import hu.tvarga.conversion.R2;
 import hu.tvarga.conversion.dto.ConversionListElement;
+import hu.tvarga.rates.app.layout.BackgroundLoadingIndicator;
 import hu.tvarga.rates.common.ui.BaseFragment;
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -33,6 +34,9 @@ public class ConversionFragment extends BaseFragment {
 
 	@BindView(R2.id.conversionRecyclerView)
 	RecyclerView conversionRecyclerView;
+
+	@BindView(R2.id.loadingIndicator)
+	BackgroundLoadingIndicator loadingIndicator;
 
 	@Inject
 	ConversionListAdapter conversionListAdapter;
@@ -62,11 +66,9 @@ public class ConversionFragment extends BaseFragment {
 		conversionViewModel = ViewModelProviders.of(this, conversionViewModelFactory).get(
 				ConversionViewModel.class);
 		compositeDisposable.add(
-				conversionViewModel.getConversions().subscribe(this::handleConversionLiveData));
+				conversionViewModel.getConversions().subscribe(this::handleConversion));
 		compositeDisposable.add(conversionListAdapter.getConversionListElementPublishSubject()
-				.subscribe(conversionListElement -> {
-					conversionViewModel.setModifiedListItem(conversionListElement);
-				}));
+				.subscribe(conversionViewModel::setModifiedListItem));
 	}
 
 	@Override
@@ -77,7 +79,8 @@ public class ConversionFragment extends BaseFragment {
 		super.onDestroyView();
 	}
 
-	private void handleConversionLiveData(List<ConversionListElement> conversionListElements) {
+	private void handleConversion(List<ConversionListElement> conversionListElements) {
+		loadingIndicator.hide();
 		if (conversionListElements == null || conversionListElements.isEmpty()) {
 			noConversion.setVisibility(View.VISIBLE);
 			conversionRecyclerView.setVisibility(View.GONE);
