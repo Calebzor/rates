@@ -107,6 +107,7 @@ jobs:
           name: Set Ruby Version
           command:  echo "ruby-2.4" > ~/.ruby-version
       - run: gem install bundler
+      - run: bundle install
       - run: bundle update --bundler
       - run:
           name: Fastlane
