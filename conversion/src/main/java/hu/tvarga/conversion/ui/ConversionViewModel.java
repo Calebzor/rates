@@ -26,7 +26,7 @@ import timber.log.Timber;
 
 public class ConversionViewModel extends ViewModel {
 
-	public static final long POLLING_INTERVAL = 1L;
+	private static final long POLLING_INTERVAL = 1L;
 	private final ConversionRepository conversionRepository;
 	private final LocaleProvider localeProvider;
 	private final ConversionListElement conversionListElement = new ConversionListElement("1.00",
@@ -35,13 +35,13 @@ public class ConversionViewModel extends ViewModel {
 			PublishSubject.create();
 	private Disposable subscribe;
 
-	public ConversionViewModel(ConversionRepository conversionRepository,
+	ConversionViewModel(ConversionRepository conversionRepository,
 			LocaleProvider localeProvider) {
 		this.conversionRepository = conversionRepository;
 		this.localeProvider = localeProvider;
 	}
 
-	public PublishSubject<List<ConversionListElement>> getConversions() {
+	PublishSubject<List<ConversionListElement>> getConversions() {
 		pollForConversions();
 		return conversionListElementsPublishSubject;
 	}

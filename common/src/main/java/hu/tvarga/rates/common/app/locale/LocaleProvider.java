@@ -19,7 +19,4 @@ public class LocaleProvider {
 		return systemConfigurationWrapper.getCurrentLocale();
 	}
 
-	public boolean isLocalEnUS() {
-		return Locale.US.equals(getCurrentLocale());
-	}
 }
