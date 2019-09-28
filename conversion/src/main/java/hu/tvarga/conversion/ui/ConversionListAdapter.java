@@ -152,7 +152,7 @@ public class ConversionListAdapter
 		return String.format(localeProvider.getCurrentLocale(), "%.2f", multiplied);
 	}
 
-	public PublishSubject<ConversionListElement> getConversionListElementPublishSubject() {
+	PublishSubject<ConversionListElement> getConversionListElementPublishSubject() {
 		return conversionListElementPublishSubject;
 	}
 
@@ -163,8 +163,6 @@ public class ConversionListAdapter
 
 	void setConversionList(List<ConversionListElement> listElements) {
 		applyMultiplier(listElements);
-		//		DiffUtil.DiffResult diffResult = getDiffResult(this.listElements, listElements);
-		//		diffResult.dispatchUpdatesTo(this);
 		this.listElements.clear();
 		this.listElements.addAll(listElements);
 		notifyItemRangeChanged(1, listElements.size() - 1);

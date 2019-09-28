@@ -39,11 +39,11 @@
 # https://github.com/google/dagger/issues/645#issuecomment-296851566
 -dontwarn com.google.errorprone.annotations.*
 
--keepclassmembers class hu.tvarga.rates.**ApiObject {
+-keepclassmembers class hu.tvarga.**ApiObject {
     !static !transient <fields>;
 }
 
--keepclassmembers enum hu.tvarga.rates.**ApiObject { *; }
+-keepclassmembers enum hu.tvarga.**ApiObject { *; }
 
 -keep class okhttp3.internal.platform.** { *; }
 -dontwarn okhttp3.internal.platform.**

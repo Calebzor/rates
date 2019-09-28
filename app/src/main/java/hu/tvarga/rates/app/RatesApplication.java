@@ -15,7 +15,6 @@ import dagger.android.HasActivityInjector;
 import dagger.android.HasServiceInjector;
 import hu.tvarga.rates.BuildConfig;
 import hu.tvarga.rates.app.di.ApplicationComponent;
-import hu.tvarga.rates.app.di.BaseApplicationModule;
 import hu.tvarga.rates.app.di.DaggerApplicationComponent;
 import timber.log.Timber;
 
@@ -45,8 +44,7 @@ public class RatesApplication extends Application
 
 	@NonNull
 	protected ApplicationComponent createComponent() {
-		return DaggerApplicationComponent.builder().baseApplicationModule(
-				new BaseApplicationModule(this)).build();
+		return DaggerApplicationComponent.builder().build();
 	}
 
 	@Override

@@ -17,6 +17,7 @@ android {
 		versionName readVersionName(project)
 
 		multiDexEnabled true
+		consumerProguardFiles 'proguard-rules.pro'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -26,7 +27,7 @@ android {
 			testCoverageEnabled true
 		}
 		release {
-			minifyEnabled false
+			minifyEnabled true
 			proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 		}
 	}

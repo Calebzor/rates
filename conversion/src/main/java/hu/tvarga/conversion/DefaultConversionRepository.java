@@ -24,6 +24,7 @@ public class DefaultConversionRepository implements ConversionRepository {
 
 	@Override
 	public Flowable<Conversion> getConversion(@NonNull String base) {
+		// could do persistent caching here
 		return conversionApiService.getLatestConversionForBase(base).onErrorReturn(
 				throwable -> new ConversionApiObject()).subscribeOn(Schedulers.io()).map(
 				conversionModelMapper::mapToConversionModel).toFlowable();

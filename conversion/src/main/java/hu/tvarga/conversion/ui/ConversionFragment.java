@@ -43,7 +43,6 @@ public class ConversionFragment extends BaseFragment {
 
 	@Inject
 	ConversionViewModel.ConversionViewModelFactory conversionViewModelFactory;
-	private ConversionViewModel conversionViewModel;
 
 	private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -63,8 +62,8 @@ public class ConversionFragment extends BaseFragment {
 	@Override
 	public void onActivityCreated(@Nullable Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		conversionViewModel = ViewModelProviders.of(this, conversionViewModelFactory).get(
-				ConversionViewModel.class);
+		ConversionViewModel conversionViewModel = ViewModelProviders.of(this,
+				conversionViewModelFactory).get(ConversionViewModel.class);
 		compositeDisposable.add(
 				conversionViewModel.getConversions().subscribe(this::handleConversion));
 		compositeDisposable.add(conversionListAdapter.getConversionListElementPublishSubject()
