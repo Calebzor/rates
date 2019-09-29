@@ -1,7 +1,8 @@
 package hu.tvarga.conversion.dto;
 
-import android.icu.util.Currency;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Currency;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -45,10 +46,6 @@ public class ConversionListElement implements Comparable<ConversionListElement> 
 		return conversionRate;
 	}
 
-	public void setConversionRate(String conversionRate) {
-		this.conversionRate = conversionRate;
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -70,5 +67,12 @@ public class ConversionListElement implements Comparable<ConversionListElement> 
 	@Override
 	public int compareTo(ConversionListElement o) {
 		return getISOCodeString().compareTo(o.getISOCodeString());
+	}
+
+	@NotNull
+	@Override
+	public String toString() {
+		return "ConversionListElement{" + "value='" + value + '\'' + ", conversionRate='" +
+				conversionRate + '\'' + ", currency=" + currency + '}';
 	}
 }

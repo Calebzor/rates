@@ -1,8 +1,7 @@
 package hu.tvarga.conversion.ui;
 
-import android.icu.util.Currency;
-
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -15,24 +14,28 @@ import androidx.lifecycle.ViewModelProvider;
 import hu.tvarga.conversion.ConversionRepository;
 import hu.tvarga.conversion.dto.Conversion;
 import hu.tvarga.conversion.dto.ConversionListElement;
+import hu.tvarga.rates.common.app.util.SchedulerProvider;
 import io.reactivex.Flowable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subjects.PublishSubject;
 import timber.log.Timber;
 
 public class ConversionViewModel extends ViewModel {
 
-	private static final long POLLING_INTERVAL = 1L;
+	static final long POLLING_INTERVAL = 1L;
+	static final TimeUnit POLLING_UNIT = TimeUnit.SECONDS;
 	private final ConversionRepository conversionRepository;
+	private final SchedulerProvider schedulerProvider;
 	private final ConversionListElement conversionListElement = new ConversionListElement("1.00",
 			"1.00", Currency.getInstance("EUR"));
 	private final PublishSubject<List<ConversionListElement>> conversionListElementsPublishSubject =
 			PublishSubject.create();
 	private Disposable disposable;
 
-	private ConversionViewModel(ConversionRepository conversionRepository) {
+	ConversionViewModel(ConversionRepository conversionRepository,
+			SchedulerProvider schedulerProvider) {
 		this.conversionRepository = conversionRepository;
+		this.schedulerProvider = schedulerProvider;
 	}
 
 	PublishSubject<List<ConversionListElement>> getConversions() {
@@ -43,8 +46,9 @@ public class ConversionViewModel extends ViewModel {
 	private void pollForConversions() {
 		Flowable<Conversion> conversions = conversionRepository.getConversion(
 				conversionListElement.getISOCodeString());
-		disposable = conversions.delay(POLLING_INTERVAL, TimeUnit.SECONDS).repeatUntil(() -> false)
-				.observeOn(AndroidSchedulers.mainThread()).subscribe(this::handleConversion,
+		disposable = conversions.delay(POLLING_INTERVAL, POLLING_UNIT, schedulerProvider.io())
+				.repeatUntil(() -> false).observeOn(schedulerProvider.mainThread()).subscribe(
+						this::handleConversion,
 						Timber::w);
 	}
 
@@ -84,17 +88,20 @@ public class ConversionViewModel extends ViewModel {
 	public static class ConversionViewModelFactory implements ViewModelProvider.Factory {
 
 		private final ConversionRepository conversionRepository;
+		private final SchedulerProvider schedulerProvider;
 
 		@Inject
-		public ConversionViewModelFactory(ConversionRepository conversionRepository) {
+		public ConversionViewModelFactory(ConversionRepository conversionRepository,
+				SchedulerProvider schedulerProvider) {
 			this.conversionRepository = conversionRepository;
+			this.schedulerProvider = schedulerProvider;
 		}
 
 		@NonNull
 		@Override
 		public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
 			//noinspection unchecked
-			return (T) new ConversionViewModel(conversionRepository);
+			return (T) new ConversionViewModel(conversionRepository, schedulerProvider);
 		}
 
 	}

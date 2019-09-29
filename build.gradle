@@ -27,7 +27,7 @@ allprojects {
 
 ext {
 	globalCompileSDK = 28
-	globalMinSDK = 24 // for android.icu.util.Currency
+	globalMinSDK = 21
 	globalTargetSDK = 28
 }
 
