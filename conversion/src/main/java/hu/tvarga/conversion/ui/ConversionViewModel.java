@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider;
 import hu.tvarga.conversion.ConversionRepository;
 import hu.tvarga.conversion.dto.Conversion;
 import hu.tvarga.conversion.dto.ConversionListElement;
-import hu.tvarga.rates.common.app.locale.LocaleProvider;
 import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -26,17 +25,14 @@ public class ConversionViewModel extends ViewModel {
 
 	private static final long POLLING_INTERVAL = 1L;
 	private final ConversionRepository conversionRepository;
-	private final LocaleProvider localeProvider;
 	private final ConversionListElement conversionListElement = new ConversionListElement("1.00",
 			"1.00", Currency.getInstance("EUR"));
 	private final PublishSubject<List<ConversionListElement>> conversionListElementsPublishSubject =
 			PublishSubject.create();
-	private Disposable subscribe;
+	private Disposable disposable;
 
-	ConversionViewModel(ConversionRepository conversionRepository,
-			LocaleProvider localeProvider) {
+	private ConversionViewModel(ConversionRepository conversionRepository) {
 		this.conversionRepository = conversionRepository;
-		this.localeProvider = localeProvider;
 	}
 
 	PublishSubject<List<ConversionListElement>> getConversions() {
@@ -47,21 +43,23 @@ public class ConversionViewModel extends ViewModel {
 	private void pollForConversions() {
 		Flowable<Conversion> conversions = conversionRepository.getConversion(
 				conversionListElement.getISOCodeString());
-		subscribe = conversions.delay(POLLING_INTERVAL, TimeUnit.SECONDS).repeatUntil(() -> false)
-				.observeOn(AndroidSchedulers.mainThread()).subscribe(conversion -> {
-					List<ConversionListElement> conversionListElements = new ArrayList<>();
-					if (conversion != null && conversion.getRates() != null) {
-						conversionListElements.add(conversionListElement);
-						Map<String, String> rates = conversion.getRates();
-						for (Map.Entry<String, String> entry : rates.entrySet()) {
-							ConversionListElement element = new ConversionListElement(
-									entry.getValue(), entry.getValue(),
-									Currency.getInstance(entry.getKey()));
-							conversionListElements.add(element);
-						}
-					}
-					conversionListElementsPublishSubject.onNext(conversionListElements);
-				}, Timber::w);
+		disposable = conversions.delay(POLLING_INTERVAL, TimeUnit.SECONDS).repeatUntil(() -> false)
+				.observeOn(AndroidSchedulers.mainThread()).subscribe(this::handleConversion,
+						Timber::w);
+	}
+
+	private void handleConversion(Conversion conversion) {
+		List<ConversionListElement> conversionListElements = new ArrayList<>();
+		if (conversion != null && conversion.getRates() != null) {
+			conversionListElements.add(conversionListElement);
+			Map<String, String> rates = conversion.getRates();
+			for (Map.Entry<String, String> entry : rates.entrySet()) {
+				ConversionListElement element = new ConversionListElement(entry.getValue(),
+						entry.getValue(), Currency.getInstance(entry.getKey()));
+				conversionListElements.add(element);
+			}
+		}
+		conversionListElementsPublishSubject.onNext(conversionListElements);
 	}
 
 	@Override
@@ -71,12 +69,12 @@ public class ConversionViewModel extends ViewModel {
 	}
 
 	private void disposePolling() {
-		if (subscribe != null) {
-			subscribe.dispose();
+		if (disposable != null) {
+			disposable.dispose();
 		}
 	}
 
-	public void setModifiedListItem(ConversionListElement conversionListElement) {
+	void setModifiedListItem(ConversionListElement conversionListElement) {
 		disposePolling();
 		this.conversionListElement.setCurrency(conversionListElement.getCurrency());
 		this.conversionListElement.setValue(conversionListElement.getValue());
@@ -86,20 +84,17 @@ public class ConversionViewModel extends ViewModel {
 	public static class ConversionViewModelFactory implements ViewModelProvider.Factory {
 
 		private final ConversionRepository conversionRepository;
-		private final LocaleProvider localeProvider;
 
 		@Inject
-		public ConversionViewModelFactory(ConversionRepository conversionRepository,
-				LocaleProvider localeProvider) {
+		public ConversionViewModelFactory(ConversionRepository conversionRepository) {
 			this.conversionRepository = conversionRepository;
-			this.localeProvider = localeProvider;
 		}
 
 		@NonNull
 		@Override
 		public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
 			//noinspection unchecked
-			return (T) new ConversionViewModel(conversionRepository, localeProvider);
+			return (T) new ConversionViewModel(conversionRepository);
 		}
 
 	}

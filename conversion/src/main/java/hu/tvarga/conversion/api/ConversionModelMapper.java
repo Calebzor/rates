@@ -1,7 +1,5 @@
 package hu.tvarga.conversion.api;
 
-import java.math.BigDecimal;
-
 import javax.inject.Inject;
 
 import hu.tvarga.conversion.api.dao.ConversionApiObject;
@@ -15,6 +13,6 @@ public class ConversionModelMapper {
 	}
 
 	public Conversion mapToConversionModel(ConversionApiObject conversionApiObject) {
-		return new Conversion(conversionApiObject.base, BigDecimal.ONE, conversionApiObject.rates);
+		return new Conversion(conversionApiObject.rates);
 	}
 }
