@@ -179,7 +179,10 @@ public class ConversionListAdapter
 				@Override
 				public void afterTextChanged(Editable s) {
 					String newAmount = s.toString();
-					if (!StringUtils.isNullOrEmpty(newAmount) && amount.isFocused()) {
+					if (amount.isFocused()) {
+						if (StringUtils.isNullOrEmpty(newAmount)) {
+							newAmount = "0";
+						}
 						element.setValue(newAmount);
 						listElements.get(0).setValue(newAmount);
 						applyMultiplier(listElements);
