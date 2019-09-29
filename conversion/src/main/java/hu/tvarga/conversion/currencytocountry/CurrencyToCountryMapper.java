@@ -14,7 +14,7 @@ public class CurrencyToCountryMapper {
 
 	public static final String UNKNOWN_CURRENCY_TO_COUNTRY_MAPPING =
 			"UnknownCurrencyToCountryMapping";
-	private Map<String, CurrencyToCountryMapObject> mapping;
+	private Map<String, CurrencyToCountryMapApiObject> mapping;
 
 	private final Gson gson;
 
@@ -36,11 +36,11 @@ public class CurrencyToCountryMapper {
 	private void ensureMappingIsInitialized() {
 		if (mapping == null) {
 			mapping = new HashMap<>();
-			Type listType = new TypeToken<ArrayList<CurrencyToCountryMapObject>>() {}.getType();
-			ArrayList<CurrencyToCountryMapObject> listOfMapping = gson.fromJson(
+			Type listType = new TypeToken<ArrayList<CurrencyToCountryMapApiObject>>() {}.getType();
+			ArrayList<CurrencyToCountryMapApiObject> listOfMapping = gson.fromJson(
 					CurrencyToCountryMap.JSON, listType);
 
-			for (CurrencyToCountryMapObject currencyToCountryMap : listOfMapping) {
+			for (CurrencyToCountryMapApiObject currencyToCountryMap : listOfMapping) {
 				mapping.put(currencyToCountryMap.Code, currencyToCountryMap);
 			}
 
@@ -59,6 +59,6 @@ public class CurrencyToCountryMapper {
 	}
 
 	private void putCurrencyForCountry(String currency, String country) {
-		mapping.put(currency, new CurrencyToCountryMapObject(country));
+		mapping.put(currency, new CurrencyToCountryMapApiObject(country));
 	}
 }

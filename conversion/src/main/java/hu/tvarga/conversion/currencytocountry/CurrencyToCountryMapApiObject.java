@@ -1,11 +1,11 @@
 package hu.tvarga.conversion.currencytocountry;
 
-class CurrencyToCountryMapObject {
+class CurrencyToCountryMapApiObject {
 
 	String CountryCode; // NOSONAR
 	String Code; // NOSONAR
 
-	CurrencyToCountryMapObject(String countryCode) {
+	CurrencyToCountryMapApiObject(String countryCode) {
 		CountryCode = countryCode;
 	}
 }
