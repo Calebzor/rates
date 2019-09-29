@@ -4,7 +4,7 @@ references:
   ## Cache
 
   cache_key: &cache_key
-    key: cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}-{{ checksum "common_dependencies.gradle" }}-{{ checksum "common/build.gradle" }}-{{ checksum "conversion/build.gradle" }}
+    key: cache-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}-{{checksum "conversion/build.gradle" }}-{{checksum "common/build.gradle" }}-{{ checksum "common_dependencies.gradle" }}
   restore_cache: &restore_cache
     restore_cache:
       <<: *cache_key
@@ -27,6 +27,16 @@ references:
     persist_to_workspace:
       root: *workspace
       paths:
+        - common/build/intermediates
+        - common/build/outputs/androidTest-results
+        - common/build/outputs/code-coverage
+        - common/build/test-results
+        - common/build/jacoco
+        - conversionr/build/intermediates
+        - conversionr/build/outputs/androidTest-results
+        - conversionr/build/outputs/code-coverage
+        - conversionr/build/test-results
+        - conversionr/build/jacoco
         - app/build/intermediates
         - app/build/outputs/androidTest-results
         - app/build/outputs/apk
@@ -66,10 +76,18 @@ jobs:
           path: app/build/outputs/apk/
           destination: /apk/
       - store_artifacts:
+          path: common/build/reports
+          destination: common-reports
+      - store_artifacts:
+          path: conversion/build/reports
+          destination: conversion-reports
+      - store_artifacts:
           path: app/build/reports
           destination: app-reports
       - store_test_results:
           paths:
+            - common/build/test-results
+            - conversion/build/test-results
             - app/build/test-results
 
   coverage_and_sonar:
@@ -91,6 +109,12 @@ jobs:
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: /apk/
+      - store_artifacts:
+          path: common/build/reports
+          destination: common-reports
+      - store_artifacts:
+          path: conversion/build/reports
+          destination: conversion-reports
       - store_artifacts:
           path: app/build/reports
           destination: app-reports
